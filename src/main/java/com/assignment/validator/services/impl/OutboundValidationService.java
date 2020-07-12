@@ -9,6 +9,7 @@ import com.assignment.validator.enums.ValidationStatus;
 import com.assignment.validator.services.RateLimiterService;
 import com.assignment.validator.services.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -28,6 +29,12 @@ import java.time.temporal.ChronoUnit;
 @Service("outboundValidationService")
 public class OutboundValidationService implements ValidationService {
 
+	@Value("${rateLimiter.outbound.maxCount}")
+	private int maxCount;
+
+	@Value("${rateLimiter.outbound.ttlInHours}")
+	private int ttlInHours;
+
 	@Autowired
 	private PhoneNumberService phoneNumberService;
 
@@ -43,7 +50,7 @@ public class OutboundValidationService implements ValidationService {
 
 	@Override
 	public Mono<ValidationResponse> validate(@NotNull String username, @NotNull final ValidationRequest validationRequest) {
-		return rateLimiterService.apply(CacheKeyConstants.COUNT + CacheKeyConstants.HYPHEN + validationRequest.getFrom(), 2, 24, ChronoUnit.HOURS)
+		return rateLimiterService.apply(CacheKeyConstants.COUNT + CacheKeyConstants.HYPHEN + validationRequest.getFrom(), maxCount, ttlInHours, ChronoUnit.HOURS)
 				.flatMap(isWithinLimit -> {
 					if(!isWithinLimit) {
 						return Mono.just(getValidationResponse("", ValidationStatus.INVALID, "limit reached for from " + validationRequest.getFrom()));
