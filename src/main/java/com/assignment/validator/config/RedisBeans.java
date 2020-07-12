@@ -44,4 +44,13 @@ public class RedisBeans {
 		final RedisSerializationContext<String, ValidationRequest> context = builder.value(serializer).build();
 		return new ReactiveRedisTemplate<>(redisConnectionFactory, context);
 	}
+
+	@Bean
+	ReactiveRedisOperations<String, Long> redisRateLimiterOperations(ReactiveRedisConnectionFactory redisConnectionFactory) {
+		final Jackson2JsonRedisSerializer<Long> serializer = new Jackson2JsonRedisSerializer<>(Long.class);
+		final RedisSerializationContext.RedisSerializationContextBuilder<String, Long> builder =
+				RedisSerializationContext.newSerializationContext(new StringRedisSerializer());
+		final RedisSerializationContext<String, Long> context = builder.value(serializer).build();
+		return new ReactiveRedisTemplate<>(redisConnectionFactory, context);
+	}
 }

@@ -46,10 +46,15 @@ public class InboundValidationService implements ValidationService {
 				return getValidationResponse("", ValidationStatus.INVALID, "to parameter not found");
 			}
 			if(MessageUtil.isStopMessage(validationRequest.getText())) {
-				redisBlockOperations.opsForValue().set("STOP" + '_' + validationRequest.getFrom() + '_' + validationRequest.getTo(), validationRequest, Duration.of(stopRequestExpiryInHours, ChronoUnit.SECONDS)).subscribe();
+				redisBlockOperations.opsForValue().set("STOP" + '_' + validationRequest.getFrom() + '_' + validationRequest.getTo(), validationRequest, Duration.of(stopRequestExpiryInHours, ChronoUnit.HOURS)).subscribe();
 			}
 			return getValidationResponse("inbound sms ok", ValidationStatus.VALID, "");
 		});
+	}
+
+	@Override
+	public Mono<Boolean> rateLimit(ValidationRequest validationRequest) {
+		throw new UnsupportedOperationException("Operation not supported");
 	}
 
 	private ValidationResponse getValidationResponse(String message, ValidationStatus status, String errorMessage) {

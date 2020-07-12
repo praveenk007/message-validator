@@ -12,7 +12,7 @@ spring:
     initialization-mode: never
 
 cache:
-  stopRequestExpiryInHours: 60
+  stopRequestExpiryInHours: 4
   redis:
     host: localhost
     port: 6379

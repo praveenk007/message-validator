@@ -18,4 +18,6 @@ import reactor.core.publisher.Mono;
 public interface ValidationService {
 
 	Mono<ValidationResponse> validate(String username, ValidationRequest validationRequest);
+
+	Mono<Boolean> rateLimit(ValidationRequest validationRequest);
 }
