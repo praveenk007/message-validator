@@ -11,7 +11,7 @@ package com.assignment.validator.enums;
  */
 public enum ValidationStatus {
 
-	SUCCESS,
+	VALID,
 
-	FAILURE
+	INVALID
 }

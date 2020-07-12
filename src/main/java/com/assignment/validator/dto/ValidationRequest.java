@@ -18,7 +18,7 @@ import javax.validation.constraints.Size;
 @Data
 @Builder
 @Validated
-public class MessageDTO {
+public class ValidationRequest {
 
 	@Size(min = 6, max = 16)
 	private String from;

@@ -1,8 +1,10 @@
-package com.assignment.validator.pojos;
+package com.assignment.validator.dto;
 
 import com.assignment.validator.enums.ValidationStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.annotation.Transient;
 
 /**
  * <p>
@@ -15,9 +17,12 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class ValidationResult {
+public class ValidationResponse {
 
+	@JsonIgnore
 	private ValidationStatus status;
 
 	private String message;
+
+	private String error;
 }

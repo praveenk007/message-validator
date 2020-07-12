@@ -1,6 +1,9 @@
 package com.assignment.validator.services;
 
+import com.assignment.validator.dto.ValidationRequest;
+import com.assignment.validator.dto.ValidationResponse;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 /**
  * <p>
@@ -12,13 +15,7 @@ import org.springframework.stereotype.Service;
  * @since 1.0.0
  */
 @Service
-public class ValidationService {
+public interface ValidationService {
 
-	public void validateInboundMessage() {
-
-	}
-
-	public void validateOutboundMessage() {
-
-	}
+	Mono<ValidationResponse> validate(String username, ValidationRequest validationRequest);
 }

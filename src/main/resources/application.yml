@@ -1,9 +1,6 @@
 server:
   port: 8100
 spring:
-  redis:
-    host: localhost
-    port: 6379
   datasource:
     url: jdbc:postgresql://localhost:5432/auth?useSSL=false
     username: praveenkamath
@@ -13,3 +10,9 @@ spring:
       test-while-idle: true
       validation-query: SELECT 1
     initialization-mode: never
+
+cache:
+  stopRequestExpiryInHours: 4
+  redis:
+    host: localhost
+    port: 6379

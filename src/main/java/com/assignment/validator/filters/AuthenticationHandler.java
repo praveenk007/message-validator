@@ -1,7 +1,7 @@
 package com.assignment.validator.filters;
 
 import com.assignment.validator.pojos.AuthCredentials;
-import com.assignment.validator.services.AccountService;
+import com.assignment.validator.services.impl.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
