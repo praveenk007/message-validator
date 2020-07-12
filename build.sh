@@ -1,0 +1,1 @@
+sudo ./mvnw clean install
