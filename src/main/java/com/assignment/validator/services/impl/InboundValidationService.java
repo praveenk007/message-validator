@@ -1,5 +1,8 @@
 package com.assignment.validator.services.impl;
 
+import com.assignment.validator.constants.CacheKeyConstants;
+import com.assignment.validator.constants.Message;
+import com.assignment.validator.constants.ResponseMessage;
 import com.assignment.validator.dto.ValidationRequest;
 import com.assignment.validator.dto.ValidationResponse;
 import com.assignment.validator.enums.ValidationStatus;
@@ -46,9 +49,9 @@ public class InboundValidationService implements ValidationService {
 				return getValidationResponse("", ValidationStatus.INVALID, "to parameter not found");
 			}
 			if(MessageUtil.isStopMessage(validationRequest.getText())) {
-				redisBlockOperations.opsForValue().set("STOP" + '_' + validationRequest.getFrom() + '_' + validationRequest.getTo(), validationRequest, Duration.of(stopRequestExpiryInHours, ChronoUnit.HOURS)).subscribe();
+				redisBlockOperations.opsForValue().set(Message.BLOCK_TOKEN + CacheKeyConstants.HYPHEN + validationRequest.getFrom() + CacheKeyConstants.HYPHEN + validationRequest.getTo(), validationRequest, Duration.of(stopRequestExpiryInHours, ChronoUnit.HOURS)).subscribe();
 			}
-			return getValidationResponse("inbound sms ok", ValidationStatus.VALID, "");
+			return getValidationResponse(ResponseMessage.INBOUND_OK, ValidationStatus.VALID, "");
 		});
 	}
 

@@ -1,5 +1,8 @@
 package com.assignment.validator.services.impl;
 
+import com.assignment.validator.constants.CacheKeyConstants;
+import com.assignment.validator.constants.Message;
+import com.assignment.validator.constants.ResponseMessage;
 import com.assignment.validator.dto.ValidationRequest;
 import com.assignment.validator.dto.ValidationResponse;
 import com.assignment.validator.enums.ValidationStatus;
@@ -12,7 +15,6 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.constraints.NotNull;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 
 /**
  * <p>
@@ -41,7 +43,7 @@ public class OutboundValidationService implements ValidationService {
 
 	@Override
 	public Mono<ValidationResponse> validate(@NotNull String username, @NotNull final ValidationRequest validationRequest) {
-		return rateLimiterService.apply("COUNT" + '_' + validationRequest.getFrom(), 2, 24, ChronoUnit.HOURS)
+		return rateLimiterService.apply(CacheKeyConstants.COUNT + CacheKeyConstants.HYPHEN + validationRequest.getFrom(), 2, 24, ChronoUnit.HOURS)
 				.flatMap(isWithinLimit -> {
 					if(!isWithinLimit) {
 						return Mono.just(getValidationResponse("", ValidationStatus.INVALID, "limit reached for from " + validationRequest.getFrom()));
@@ -51,22 +53,22 @@ public class OutboundValidationService implements ValidationService {
 								if(!isNumberValid) {
 									return Mono.just(getValidationResponse("", ValidationStatus.INVALID, "to parameter not found"));
 								}
-								return redisBlockOperations.opsForValue().get("STOP" + '_' + validationRequest.getFrom() + '_' + validationRequest.getTo())
+								return redisBlockOperations.opsForValue().get(Message.BLOCK_TOKEN + CacheKeyConstants.HYPHEN + validationRequest.getFrom() + '_' + validationRequest.getTo())
 										.map(cachedValidationRequest -> ValidationResponse
 												.builder()
 												.status(ValidationStatus.INVALID)
 												.message("")
 												.error("sms from " + validationRequest.getFrom() + " to " + validationRequest.getTo() + " blocked by STOP request")
 												.build())
-										.defaultIfEmpty(getValidationResponse("outbound sms ok", ValidationStatus.VALID, ""));
+										.defaultIfEmpty(getValidationResponse(ResponseMessage.OUTBOUND_OK, ValidationStatus.VALID, ""));
 							});
 				});
 	}
 
 	@Override
 	public Mono<Boolean> rateLimit(final ValidationRequest validationRequest) {
-		return rateLimiterService.getCount("COUNT" + validationRequest.getFrom())
-				.flatMap(count -> rateLimiterService.apply("COUNT" + '_' + validationRequest.getFrom(), 4, 24, ChronoUnit.HOURS));
+		return rateLimiterService.getCount(CacheKeyConstants.COUNT + validationRequest.getFrom())
+				.flatMap(count -> rateLimiterService.apply(CacheKeyConstants.COUNT + CacheKeyConstants.HYPHEN + validationRequest.getFrom(), 4, 24, ChronoUnit.HOURS));
 	}
 
 	private ValidationResponse getValidationResponse(final String message, final ValidationStatus status, final String errorMessage) {
