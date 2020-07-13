@@ -9,7 +9,6 @@ import com.assignment.validator.enums.ValidationStatus;
 import com.assignment.validator.services.CacheService;
 import com.assignment.validator.services.ValidationService;
 import com.assignment.validator.utils.MessageUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -30,16 +29,16 @@ import java.time.temporal.ChronoUnit;
 @Service("inboundValidationService")
 public class InboundValidationService implements ValidationService {
 
-	@Autowired
-	private PhoneNumberService phoneNumberService;
+	private final PhoneNumberService phoneNumberService;
 
 	@Value("${cache.stopRequestExpiryInHours}")
 	private long stopRequestExpiryInHours;
 
 	private final CacheService<ValidationRequest> cacheService;
 
-	public InboundValidationService(CacheService<ValidationRequest> cacheService) {
+	public InboundValidationService(CacheService<ValidationRequest> cacheService, PhoneNumberService phoneNumberService) {
 		this.cacheService = cacheService;
+		this.phoneNumberService = phoneNumberService;
 	}
 
 	@Override

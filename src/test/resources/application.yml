@@ -1,0 +1,10 @@
+cache:
+  stopRequestExpiryInHours: 4
+  redis:
+    host: localhost
+    port: 6379
+
+rateLimiter:
+  outbound:
+    maxCount: 50
+    ttlInHours: 24
