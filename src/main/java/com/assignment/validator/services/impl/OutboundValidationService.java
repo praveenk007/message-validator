@@ -6,11 +6,11 @@ import com.assignment.validator.constants.ResponseMessage;
 import com.assignment.validator.dto.ValidationRequest;
 import com.assignment.validator.dto.ValidationResponse;
 import com.assignment.validator.enums.ValidationStatus;
+import com.assignment.validator.services.CacheService;
 import com.assignment.validator.services.RateLimiterService;
 import com.assignment.validator.services.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -40,11 +40,11 @@ public class OutboundValidationService implements ValidationService {
 
 	private final RateLimiterService rateLimiterService;
 
-	private final ReactiveRedisOperations<String, ValidationRequest> redisBlockOperations;
+	private final CacheService<ValidationRequest> cacheService;
 
-	public OutboundValidationService(ReactiveRedisOperations<String, ValidationRequest> redisBlockOperations,
+	public OutboundValidationService(CacheService<ValidationRequest> cacheService,
 									 RateLimiterService rateLimiterService) {
-		this.redisBlockOperations = redisBlockOperations;
+		this.cacheService = cacheService;
 		this.rateLimiterService = rateLimiterService;
 	}
 
@@ -60,7 +60,7 @@ public class OutboundValidationService implements ValidationService {
 								if(!isNumberValid) {
 									return Mono.just(getValidationResponse("", ValidationStatus.INVALID, "to parameter not found"));
 								}
-								return redisBlockOperations.opsForValue().get(Message.BLOCK_TOKEN + CacheKeyConstants.HYPHEN + validationRequest.getFrom() + '_' + validationRequest.getTo())
+								return cacheService.get(Message.BLOCK_TOKEN + CacheKeyConstants.HYPHEN + validationRequest.getFrom() + '_' + validationRequest.getTo(), ValidationRequest.class)
 										.map(cachedValidationRequest -> ValidationResponse
 												.builder()
 												.status(ValidationStatus.INVALID)

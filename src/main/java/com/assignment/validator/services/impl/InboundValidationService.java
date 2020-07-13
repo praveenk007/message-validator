@@ -6,11 +6,11 @@ import com.assignment.validator.constants.ResponseMessage;
 import com.assignment.validator.dto.ValidationRequest;
 import com.assignment.validator.dto.ValidationResponse;
 import com.assignment.validator.enums.ValidationStatus;
+import com.assignment.validator.services.CacheService;
 import com.assignment.validator.services.ValidationService;
 import com.assignment.validator.utils.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -36,10 +36,10 @@ public class InboundValidationService implements ValidationService {
 	@Value("${cache.stopRequestExpiryInHours}")
 	private long stopRequestExpiryInHours;
 
-	private final ReactiveRedisOperations<String, ValidationRequest> redisBlockOperations;
+	private final CacheService<ValidationRequest> cacheService;
 
-	public InboundValidationService(ReactiveRedisOperations<String, ValidationRequest> redisBlockOperations) {
-		this.redisBlockOperations = redisBlockOperations;
+	public InboundValidationService(CacheService<ValidationRequest> cacheService) {
+		this.cacheService = cacheService;
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class InboundValidationService implements ValidationService {
 				return getValidationResponse("", ValidationStatus.INVALID, "to parameter not found");
 			}
 			if(MessageUtil.isStopMessage(validationRequest.getText())) {
-				redisBlockOperations.opsForValue().set(Message.BLOCK_TOKEN + CacheKeyConstants.HYPHEN + validationRequest.getFrom() + CacheKeyConstants.HYPHEN + validationRequest.getTo(), validationRequest, Duration.of(stopRequestExpiryInHours, ChronoUnit.HOURS)).subscribe();
+				cacheService.set(Message.BLOCK_TOKEN + CacheKeyConstants.HYPHEN + validationRequest.getFrom() + CacheKeyConstants.HYPHEN + validationRequest.getTo(), validationRequest, Duration.of(stopRequestExpiryInHours, ChronoUnit.HOURS), ValidationRequest.class).subscribe();
 			}
 			return getValidationResponse(ResponseMessage.INBOUND_OK, ValidationStatus.VALID, "");
 		});
